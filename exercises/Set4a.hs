@@ -35,7 +35,11 @@ import Data.Array
 -- you remove the Eq a => constraint from the type!
 
 allEqual :: Eq a => [a] -> Bool
-allEqual xs = todo
+allEqual [] = True
+allEqual (x:[]) = True
+allEqual (x:y:xs) 
+  | x == y = allEqual (y:xs)
+  | otherwise = False
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -50,7 +54,8 @@ allEqual xs = todo
 --   distinct [1,2] ==> True
 
 distinct :: Eq a => [a] -> Bool
-distinct = todo
+distinct [] = True
+distinct xs = length xs == length (nub xs)
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function middle that returns the middle value
@@ -63,7 +68,8 @@ distinct = todo
 --   middle 'b' 'a' 'c'  ==> 'b'
 --   middle 1 7 3        ==> 3
 
-middle = todo
+middle :: Ord a => a -> a -> a -> a
+middle a b c = sort [a,b,c] !! 1
 
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
@@ -78,8 +84,8 @@ middle = todo
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: [a] -> a
-rangeOf = todo
+rangeOf :: (Ord a, Num a) => [a] -> a
+rangeOf a = let b = sort a in (last b) - (head b)
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a list of lists, return the longest list. If there
@@ -95,7 +101,12 @@ rangeOf = todo
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
 
-longest = todo
+longest :: Ord a => [[a]] -> [a]
+longest xss = head 
+              . sortBy (comparing head)
+              . filter bymaxlength $ xss
+              where bymaxlength xs = length xs == maxlength
+                    maxlength = foldl max 0 (map length xss)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
@@ -111,8 +122,12 @@ longest = todo
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
-incrementKey = todo
+incrementKey :: (Eq k, Num v) => k -> [(k,v)] -> [(k,v)]
+incrementKey k [] = []
+incrementKey k ((key,value):cdr)
+  | k == key = (key, value + 1) : rest
+  | otherwise = (key, value) : rest
+  where rest = incrementKey k cdr
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
@@ -127,13 +142,12 @@ incrementKey = todo
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = sum xs / (fromIntegral . length $ xs)
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
 -- the name of the player with more points. If the players are tied,
--- return the name of the first player (that is, the name of the
--- player who comes first in the argument list, player1).
+-- return the name of the first player.
 --
 -- If a player doesn't exist in the map, you can assume they have 0 points.
 --
@@ -146,7 +160,12 @@ average xs = todo
 --     ==> "Lisa"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner scores player1 player2 = 
+  let p1score = Map.findWithDefault 0 player1 scores
+      p2score = Map.findWithDefault 0 player2 scores
+    in if p1score >= p2score
+       then player1
+       else player2
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
@@ -161,7 +180,11 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs lst = foldr incrementCount Map.empty lst
+  where incrementCount x counts = Map.alter increment x counts
+        increment Nothing = Just 1
+        increment (Just x) = Just (x + 1)
+
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -189,7 +212,13 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank 
+  | Map.notMember from bank = bank
+  | Map.notMember to bank = bank
+  | amount < 0 = bank
+  | Map.findWithDefault 0 from bank < amount = bank
+  | otherwise = Map.adjust (subtract amount) from 
+              . Map.adjust (+ amount) to $ bank
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -199,7 +228,9 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: Ix i => i -> i -> Array i a -> Array i a
-swap i j arr = todo
+swap i j arr = let ival = arr ! i
+                   jval = arr ! j
+                in arr // [(i, jval), (j, ival)]
 
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
@@ -210,4 +241,9 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex arr = 
+  let assoclist = (Data.Array.assocs arr)
+      maxValue (i1, val1) (i2, val2) 
+        | val1 > val2 = (i1, val1)
+        | otherwise = (i2, val2)
+  in fst (foldr maxValue (assoclist !! 0) assoclist)
