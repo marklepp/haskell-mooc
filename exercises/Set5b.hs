@@ -215,12 +215,11 @@ set (StepR:rest) val (Node a ta tb) = Node a ta (set rest val tb)
 -- Ex 10: given a value and a tree, return a path that goes from the
 -- root to the value. If the value doesn't exist in the tree, return Nothing.
 --
--- If the value occurs in the tree multiple times, prefer the leftmost occurrence.
+-- You may assume the value occurs in the tree at most once.
 --
 -- Examples:
 --   search 1 (Node 2 (Node 1 Empty Empty) (Node 3 Empty Empty))  ==>  Just [StepL]
 --   search 1 (Node 2 (Node 4 Empty Empty) (Node 3 Empty Empty))  ==>  Nothing
---   search 1 (Node 2 (Node 1 Empty Empty) (Node 1 Empty Empty))  ==>  Just [StepL]
 --   search 1 (Node 2 (Node 3 (Node 4 Empty Empty)
 --                            (Node 1 Empty Empty))
 --                    (Node 5 Empty Empty))                     ==>  Just [StepL,StepR]

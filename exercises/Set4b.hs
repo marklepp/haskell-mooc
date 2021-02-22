@@ -64,9 +64,9 @@ slHelper :: Double -> (Double, Int) -> (Double, Int)
 slHelper newValue (sum, length) = (sum + newValue, length + 1)
 
 ------------------------------------------------------------------------------
--- Ex 4: implement concat with with a fold. Define concatHelper and
--- concatStart so that the given definition of myConcat joins inner lists
--- of a list.
+-- Ex 4: implement concat with a fold. Define concatHelper and
+-- concatStart so that the given definition of myConcat joins inner
+-- lists of a list.
 --
 -- Examples:
 --   myConcat [[]]                ==> []
